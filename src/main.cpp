@@ -12,15 +12,18 @@ byte midiData1;
 byte midiData2;
 int midiChannel;
 
+// LCD setup
 const int rs = 12, en = 10, d0 = 9, d1 = 8, d2 = 7, d3 = 6, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 const int backlightPin = 21;
 LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
+// DIP switch setup
 int dipPins[16] = {26, 28, 30, 32, 38, 40, 42, 44, 27, 29, 31, 33, 39, 41, 43, 45};
 int transmitChannel[4] = {0, 0, 0, 0};
 
-
 void setup() {
+
+  // MIDI declerations
   midi1.begin(MIDI_CHANNEL_OMNI);
   midi2.begin(MIDI_CHANNEL_OMNI);
   midi3.begin(MIDI_CHANNEL_OMNI);
@@ -39,14 +42,13 @@ void setup() {
   lcd.setCursor(0, 2);
   lcd.print("MIDI merger");
 
-  int i;
-  for(i = 0; i<=15; i++){
+  for(uint8_t i = 0; i<=15; i++){
     pinMode(dipPins[i], INPUT_PULLUP);      // set the digital pins (defined above) as input
   }
   delay(2000);
 
   lcd.clear();
-  for (int i = 0; i<=3; i++){
+  for (uint8_t i = 0; i<=3; i++){
     lcd.setCursor(0,i);
     lcd.print(i+1);
     lcd.print(":");
@@ -93,7 +95,7 @@ void loop() {
   delay(1000);
 
   //  Display output channels on display
-  for (int i = 0; i <= 3; i++) {
+  for (uint8_t i = 0; i <= 3; i++) {
     transmitChannel[i] = address(i);
   }
   displayOutput(transmitChannel[0], transmitChannel[1], transmitChannel[2], transmitChannel[3]);
