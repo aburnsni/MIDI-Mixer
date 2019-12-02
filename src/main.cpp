@@ -2,10 +2,10 @@
 #include <MIDI.h>
 #include <LiquidCrystal.h>
 
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial, midiA)
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, midiB)
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, midiC)
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial3, midiD)
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial, midi1)
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, midi2)
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial2, midi3)
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial3, midi4)
 
 midi::MidiType midiType;
 byte midiData1;
@@ -16,21 +16,19 @@ const int rs = 12, en = 10, d0 = 9, d1 = 8, d2 = 7, d3 = 6, d4 = 5, d5 = 4, d6 =
 const int backlightPin = 21;
 LiquidCrystal lcd(rs, en, d0, d1, d2, d3, d4, d5, d6, d7);
 
-int dipPins[] = {26, 28, 30, 32, 38, 40, 42, 44, 27, 29, 31, 33, 39, 41, 43, 45};
-int transAChannel;
-int transBChannel;
-int transCChannel;
-int transDChannel;
+int dipPins[16] = {26, 28, 30, 32, 38, 40, 42, 44, 27, 29, 31, 33, 39, 41, 43, 45};
+int transmitChannel[4] = {0, 0, 0, 0};
+
 
 void setup() {
-  midiA.begin(MIDI_CHANNEL_OMNI);
-  midiB.begin(MIDI_CHANNEL_OMNI);
-  midiC.begin(MIDI_CHANNEL_OMNI);
-  midiD.begin(MIDI_CHANNEL_OMNI);
-  midiA.turnThruOff();
-  midiB.turnThruOff();
-  midiC.turnThruOff();
-  midiD.turnThruOff();
+  midi1.begin(MIDI_CHANNEL_OMNI);
+  midi2.begin(MIDI_CHANNEL_OMNI);
+  midi3.begin(MIDI_CHANNEL_OMNI);
+  midi4.begin(MIDI_CHANNEL_OMNI);
+  midi1.turnThruOff();
+  midi2.turnThruOff();
+  midi3.turnThruOff();
+  midi4.turnThruOff();
 
   // set up the LCD's number of columns and rows:
   lcd.begin(20, 4);
@@ -89,47 +87,52 @@ void displayOutput(int w, int x, int y, int z) {
 
 void loop() {
 
-        midiA.sendNoteOn(42, 127, 1);    // Send a Note (pitch 42, velo 127 on channel 1)
-        delay(1000);		            // Wait for a second
-        midiA.sendNoteOff(42, 0, 1);     // Stop the note
-        delay(1000);
+  midi1.sendNoteOn(42, 127, 1);    // Send a Note (pitch 42, velo 127 on channel 1)
+  delay(1000);		            // Wait for a second
+  midi1.sendNoteOff(42, 0, 1);     // Stop the note
+  delay(1000);
 
-  // transAChannel = address(0);
-  // transBChannel = address(1);
-  // transCChannel = address(2);
-  // transDChannel = address(3);
-  // displayOutput(transAChannel, transBChannel, transCChannel, transDChannel);
+  //  Display output channels on display
+  for (int i = 0; i <= 3; i++) {
+    transmitChannel[i] = address(i);
+  }
+  displayOutput(transmitChannel[0], transmitChannel[1], transmitChannel[2], transmitChannel[3]);
 
-  // if (midiA.read()) {
-  //   if (transAChannel == 0) {
-  //     transAChannel = midiA.getChannel();
-  //   }
-  //   midiType = midiA.getType();
-  //   midiData1 = midiA.getData1();
-  //   midiData2 = midiA.getData2();
-  //   if (transAChannel == 0) {midiChannel = midiA.getChannel();} else {midiChannel = transAChannel;}
-  //   displayInput(0, midiType, midiData1, midiData2, midiChannel);
-  //   midiA.send(midiType, midiData1, midiData2, midiChannel);
-  // }
-  // if (midiB.read()) {
-  //   midiA.send(midiB.getType(),
-  //              midiB.getData1(),
-  //              midiB.getData2(),
-  //              transBChannel == 0 ? midiB.getChannel() : transBChannel);
-  // }
-  // if (midiC.read()) {
-  //   midiA.send(midiC.getType(),
-  //              midiC.getData1(),
-  //              midiC.getData2(),
-  //              transCChannel == 0 ? midiC.getChannel() : transCChannel);
-  // }
-  // if (midiD.read()) {
-  //   midiA.send(midiD.getType(),
-  //              midiD.getData1(),
-  //              midiD.getData2(),
-  //              transDChannel == 0 ? midiD.getChannel() : transDChannel);
-  // }  
+  //  Read MIDI inputs
+  if (midi1.read()) {
+    midiType = midi1.getType();
+    midiData1 = midi1.getData1();
+    midiData2 = midi1.getData2();
+    if (transmitChannel[0] == 0) {midiChannel = midi1.getChannel();} else {midiChannel = transmitChannel[0];}
+
+    midi1.send(midiType, midiData1, midiData2, midiChannel);
+    displayInput(0, midiType, midiData1, midiData2, midiChannel);
+  }
+  if (midi2.read()) {
+    midiType = midi2.getType();
+    midiData1 = midi2.getData1();
+    midiData2 = midi2.getData2();
+    if (transmitChannel[1] == 0) {midiChannel = midi2.getChannel();} else {midiChannel = transmitChannel[1];}
+
+    midi1.send(midiType, midiData1, midiData2, midiChannel);
+    displayInput(1, midiType, midiData1, midiData2, midiChannel);
+  }
+  if (midi3.read()) {
+    midiType = midi3.getType();
+    midiData1 = midi3.getData1();
+    midiData2 = midi3.getData2();
+    if (transmitChannel[2] == 0) {midiChannel = midi3.getChannel();} else {midiChannel = transmitChannel[2];}
+
+    midi1.send(midiType, midiData1, midiData2, midiChannel);
+    displayInput(2, midiType, midiData1, midiData2, midiChannel);
+  }
+  if (midi4.read()) {
+    midiType = midi4.getType();
+    midiData1 = midi4.getData1();
+    midiData2 = midi4.getData2();
+    if (transmitChannel[3] == 0) {midiChannel = midi4.getChannel();} else {midiChannel = transmitChannel[3];}
+
+    midi1.send(midiType, midiData1, midiData2, midiChannel);
+    displayInput(3, midiType, midiData1, midiData2, midiChannel);
+  }
 }
-
-
-
