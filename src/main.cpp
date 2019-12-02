@@ -98,7 +98,7 @@ void loop() {
   for (uint8_t i = 0; i <= 3; i++) {
     transmitChannel[i] = address(i);
   }
-  displayOutput(transmitChannel[0], transmitChannel[1], transmitChannel[2], transmitChannel[3]);
+  displayOutput(byte(transmitChannel[0]), byte(transmitChannel[1]), transmitChannel[2], transmitChannel[3]);
 
   //  Read MIDI inputs
   if (midi1.read()) {
