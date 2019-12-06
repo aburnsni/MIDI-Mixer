@@ -91,19 +91,12 @@ void displayInput(int v, midi::MidiType w, byte x, byte y, int z) {
 
 }
 
-void displayOutput(int w, int x, int y, int z) {
-  lcd.setCursor(18,0);
-  lcd.print(w);
-  lcd.print(" ");
-  lcd.setCursor(18,1);
-  lcd.print(x);
-  lcd.print(" ");
-  lcd.setCursor(18,2);
-  lcd.print(y);
-  lcd.print(" ");
-  lcd.setCursor(18,3);
-  lcd.print(z);
-  lcd.print(" ");
+void displayOutput(int x[]) {
+  for (int i = 0; i <= 3; i++) {
+    lcd.setCursor(18,i);
+    lcd.print(x[i]);
+    if (x[i] < 10) { lcd.print(" "); }
+  }
 }
 
 void loop() {
@@ -117,7 +110,7 @@ void loop() {
   for (uint8_t i = 0; i <= 3; i++) {
     transmitChannel[i] = address(i);
   }
-  displayOutput(byte(transmitChannel[0]), byte(transmitChannel[1]), transmitChannel[2], transmitChannel[3]);
+  displayOutput(transmitChannel);
 
   //  Read MIDI inputs
   if (midi1.read()) {
